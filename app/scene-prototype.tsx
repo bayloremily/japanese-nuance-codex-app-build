@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 type Tone = {
   label: string;
@@ -1178,23 +1178,21 @@ function ToneGauge({ tone }: { tone: Tone }) {
         <span>{tone.label}</span>
         <span className="sr-only">{tone.value} out of 5</span>
       </div>
-      <div className="relative h-3 rounded-full bg-slate-200">
-        <div
-          className="absolute left-0 top-0 h-3 rounded-full bg-slate-950"
-          style={{ width: `${tone.value * 20}%` }}
+      <div className="relative">
+        <input
+          aria-label={`${tone.label}: ${tone.value} out of 5`}
+          className="tone-slider w-full"
+          disabled
+          max="5"
+          min="1"
+          style={{ "--tone-fill": `${tone.value * 20}%` } as CSSProperties}
+          type="range"
+          value={tone.value}
         />
-        <div
-          className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-slate-950 bg-white shadow-sm"
-          style={{ left: `${tone.value * 20}%` }}
-        />
-      </div>
-      <div className="mt-2 grid grid-cols-5 gap-1" aria-hidden="true">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <span
-            className={`h-1 rounded-full ${index < tone.value ? "bg-slate-950" : "bg-slate-200"}`}
-            key={index}
-          />
-        ))}
+        <div className="mt-1 flex justify-between text-[10px] font-medium uppercase tracking-wide text-slate-500" aria-hidden="true">
+          <span>low</span>
+          <span>high</span>
+        </div>
       </div>
     </div>
   );
@@ -1479,6 +1477,16 @@ export default function ScenePrototype() {
           </section>
         ) : (
         <section className="grid flex-1 gap-5 py-5 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="lg:col-span-2">
+            <button
+              className="inline-flex h-11 items-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950"
+              onClick={() => setView("library")}
+              type="button"
+            >
+              <span aria-hidden="true">←</span>
+              ライブラリに戻る
+            </button>
+          </div>
           <div className="flex min-h-[640px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <SceneImage scene={scene.id} variant={activeVariant.id} />
 
