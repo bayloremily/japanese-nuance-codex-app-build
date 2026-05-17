@@ -18,24 +18,8 @@ type Choice = {
   tones: Tone[];
 };
 
-type Scene = {
-  id: string;
-  place: string;
-  mood: string;
-  relationship: string;
-  title: string;
-  narration: string;
-  speaker: string;
-  lineBefore: string;
-  lineAfter: string;
-  prompt: string;
-  intuition: string;
-  choices: Choice[];
-  variants?: SceneVariant[];
-};
-
 type SceneVariant = {
-  id: string;
+  id: "textbook" | "diary" | "literature";
   label: string;
   note: string;
   narration: string;
@@ -47,578 +31,14 @@ type SceneVariant = {
   choices: Choice[];
 };
 
-const afterRainVariants: SceneVariant[] = [
-  {
-    id: "dialogue",
-    label: "Dialogue",
-    note: "A friend reacts out loud in the moment.",
-    narration:
-      "The rain stopped just as you reached the overlook. Mina slows down, still catching her breath, and looks at the city lights below.",
-    speaker: "Mina",
-    lineBefore: "わあ、すごいね。この",
-    lineAfter: "、ずっと見ていたくなる。",
-    prompt: "Which word feels most natural in this soft, immediate reaction?",
-    intuition: "personal immediacy vs distant description",
-    choices: [
-      {
-        id: "keshiki",
-        text: "景色",
-        reading: "けしき",
-        gloss: "view, scenery",
-        status: "best",
-        instinct:
-          "景色 feels close to the speaker's eyes and body. It is the view right here, being felt in the moment, so it carries warmth without sounding dramatic.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Personal", value: 5 },
-          { label: "Poetic", value: 2 },
-          { label: "Formal", value: 1 },
-        ],
-      },
-      {
-        id: "fuukei",
-        text: "風景",
-        reading: "ふうけい",
-        gloss: "landscape, scene",
-        status: "possible",
-        instinct:
-          "風景 is not wrong, but it steps back from the moment. It sounds more like a described landscape, a memory, or a framed scene in narration.",
-        weird:
-          "In casual speech here, it can feel slightly composed, as if Mina is already turning the moment into prose.",
-        tones: [
-          { label: "Natural", value: 3 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 4 },
-          { label: "Formal", value: 2 },
-        ],
-      },
-      {
-        id: "koukei",
-        text: "光景",
-        reading: "こうけい",
-        gloss: "sight, spectacle",
-        status: "awkward",
-        instinct:
-          "光景 often points to a striking sight or a scene where something is happening. It fits a dramatic moment more than a quiet city view.",
-        weird:
-          "It makes the sentence sound like Mina witnessed an event, not simply a beautiful view.",
-        tones: [
-          { label: "Natural", value: 2 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 3 },
-          { label: "Formal", value: 3 },
-        ],
-      },
-      {
-        id: "keikan",
-        text: "景観",
-        reading: "けいかん",
-        gloss: "landscape appearance",
-        status: "awkward",
-        instinct:
-          "景観 belongs to public design, architecture, tourism, and city planning. It looks at scenery as an object to evaluate.",
-        weird:
-          "Here it sounds like Mina is making a planning report from the overlook.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Personal", value: 1 },
-          { label: "Poetic", value: 1 },
-          { label: "Formal", value: 5 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "thought",
-    label: "Inner thought",
-    note: "The same moment becomes private narration.",
-    narration:
-      "You do not say anything. The wet railing is cold under your hand, and the city looks softer than it did in the afternoon.",
-    speaker: "Inner voice",
-    lineBefore: "雨上がりの",
-    lineAfter: "が、少しだけ世界をやさしく見せていた。",
-    prompt: "Which word best fits reflective internal narration?",
-    intuition: "personal view vs narrated scene",
-    choices: [
-      {
-        id: "keshiki",
-        text: "景色",
-        reading: "けしき",
-        gloss: "view, scenery",
-        status: "best",
-        instinct:
-          "景色 still works beautifully because the thought is anchored in what you are personally seeing. It feels intimate and emotionally near.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Personal", value: 5 },
-          { label: "Poetic", value: 3 },
-          { label: "Formal", value: 1 },
-        ],
-      },
-      {
-        id: "fuukei",
-        text: "風景",
-        reading: "ふうけい",
-        gloss: "landscape, scene",
-        status: "possible",
-        instinct:
-          "風景 can work in narration if the writer wants a more literary, framed feeling. It turns the moment into a scene being remembered or described.",
-        weird:
-          "It is not wrong, but it adds distance. The sentence feels more like prose than a quiet thought passing through someone.",
-        tones: [
-          { label: "Natural", value: 4 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 5 },
-          { label: "Formal", value: 2 },
-        ],
-      },
-      {
-        id: "koukei",
-        text: "光景",
-        reading: "こうけい",
-        gloss: "sight, spectacle",
-        status: "possible",
-        instinct:
-          "光景 becomes more plausible in narration, especially if the sight feels memorable or cinematic. It emphasizes the image left in the mind.",
-        weird:
-          "For this gentle sentence, it can still feel a little too dramatic unless the writer wants that stronger visual impression.",
-        tones: [
-          { label: "Natural", value: 3 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 4 },
-          { label: "Formal", value: 3 },
-        ],
-      },
-      {
-        id: "keikan",
-        text: "景観",
-        reading: "けいかん",
-        gloss: "landscape appearance",
-        status: "awkward",
-        instinct:
-          "景観 is too institutional for private emotion. It sounds like the city is being evaluated as a designed environment.",
-        weird:
-          "The inner voice suddenly feels like a brochure or city-planning note, not a person having a small feeling.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Personal", value: 1 },
-          { label: "Poetic", value: 1 },
-          { label: "Formal", value: 5 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "sns",
-    label: "SNS post",
-    note: "A casual caption compresses the feeling.",
-    narration:
-      "Later, you post one photo from the overlook. The caption needs to sound natural, light, and a little emotional without becoming essay-like.",
-    speaker: "Caption",
-    lineBefore: "雨上がりの",
-    lineAfter: "、めちゃくちゃきれいだった。",
-    prompt: "What sounds natural in a casual SNS caption?",
-    intuition: "shareable immediacy vs over-written caption",
-    choices: [
-      {
-        id: "keshiki",
-        text: "景色",
-        reading: "けしき",
-        gloss: "view, scenery",
-        status: "best",
-        instinct:
-          "景色 is the easiest natural choice for a casual caption. It sounds like a person sharing what they saw, not trying too hard.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Personal", value: 4 },
-          { label: "Casual", value: 5 },
-          { label: "Polished", value: 2 },
-        ],
-      },
-      {
-        id: "fuukei",
-        text: "風景",
-        reading: "ふうけい",
-        gloss: "landscape, scene",
-        status: "possible",
-        instinct:
-          "風景 can work if the caption is more aesthetic or photo-diary-like. It sounds a touch more composed than everyday speech.",
-        weird:
-          "With めちゃくちゃきれいだった, 風景 is slightly more written than the rest of the sentence.",
-        tones: [
-          { label: "Natural", value: 4 },
-          { label: "Personal", value: 2 },
-          { label: "Casual", value: 3 },
-          { label: "Polished", value: 4 },
-        ],
-      },
-      {
-        id: "koukei",
-        text: "光景",
-        reading: "こうけい",
-        gloss: "sight, spectacle",
-        status: "awkward",
-        instinct:
-          "光景 makes the caption feel heavier, as if the photo captured an extraordinary or dramatic sight.",
-        weird:
-          "It clashes with the casual めちゃくちゃ and makes the caption sound unintentionally grand.",
-        tones: [
-          { label: "Natural", value: 2 },
-          { label: "Personal", value: 2 },
-          { label: "Casual", value: 1 },
-          { label: "Polished", value: 4 },
-        ],
-      },
-      {
-        id: "keikan",
-        text: "景観",
-        reading: "けいかん",
-        gloss: "landscape appearance",
-        status: "awkward",
-        instinct:
-          "景観 is far too formal for this caption. It points toward public scenery, cityscape preservation, or tourism language.",
-        weird:
-          "It sounds like a municipal account posted the photo, not a friend sharing a pretty night.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Personal", value: 1 },
-          { label: "Casual", value: 1 },
-          { label: "Polished", value: 5 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "textbook",
-    label: "Textbook",
-    note: "A formal description changes what sounds appropriate.",
-    narration:
-      "Now the same place appears in a guidebook-style sentence. The writer is not sharing a feeling; they are describing a public feature.",
-    speaker: "Guide text",
-    lineBefore: "この展望台からは、市街地の美しい",
-    lineAfter: "を楽しむことができます。",
-    prompt: "Which word fits a formal descriptive register?",
-    intuition: "public description vs personal reaction",
-    choices: [
-      {
-        id: "keikan",
-        text: "景観",
-        reading: "けいかん",
-        gloss: "landscape appearance",
-        status: "best",
-        instinct:
-          "景観 fits because the sentence is public, polished, and descriptive. It treats the view as a feature of the place.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Personal", value: 1 },
-          { label: "Formal", value: 5 },
-          { label: "Textbook", value: 4 },
-        ],
-      },
-      {
-        id: "keshiki",
-        text: "景色",
-        reading: "けしき",
-        gloss: "view, scenery",
-        status: "possible",
-        instinct:
-          "景色 is understandable and common, but it is a little more everyday and personal than the guidebook register.",
-        weird:
-          "In this polished sentence, 景色 slightly softens the official tone. That may be fine for a friendly travel blog, less ideal for formal copy.",
-        tones: [
-          { label: "Natural", value: 4 },
-          { label: "Personal", value: 3 },
-          { label: "Formal", value: 2 },
-          { label: "Textbook", value: 2 },
-        ],
-      },
-      {
-        id: "fuukei",
-        text: "風景",
-        reading: "ふうけい",
-        gloss: "landscape, scene",
-        status: "possible",
-        instinct:
-          "風景 can work in descriptive writing, especially when the emphasis is on a landscape-like scene rather than a planned public view.",
-        weird:
-          "It is slightly more scenic or literary than institutional. 景観 is more precise for guide-style public description.",
-        tones: [
-          { label: "Natural", value: 4 },
-          { label: "Personal", value: 2 },
-          { label: "Formal", value: 3 },
-          { label: "Textbook", value: 3 },
-        ],
-      },
-      {
-        id: "koukei",
-        text: "光景",
-        reading: "こうけい",
-        gloss: "sight, spectacle",
-        status: "awkward",
-        instinct:
-          "光景 usually suggests a particular sight or scene, often with an event-like or memorable quality.",
-        weird:
-          "A guidebook promising that visitors can enjoy a 光景 sounds oddly dramatic and less idiomatic.",
-        tones: [
-          { label: "Natural", value: 2 },
-          { label: "Personal", value: 2 },
-          { label: "Formal", value: 3 },
-          { label: "Textbook", value: 2 },
-        ],
-      },
-    ],
-  },
-];
-
-const scenes: Scene[] = [
-  {
-    id: "after-rain",
-    place: "Kichijoji, early evening",
-    mood: "quiet, relieved, a little nostalgic",
-    relationship: "close friends after a long walk",
-    title: "After the Rain",
-    narration:
-      "The rain stopped just as you reached the overlook. Streetlights begin to appear one by one beneath the damp spring air.",
-    speaker: "Mina",
-    lineBefore: "わあ、すごいね。この",
-    lineAfter: "、ずっと見ていたくなる。",
-    prompt: "Which word feels most natural in this soft, immediate reaction?",
-    intuition: "personal immediacy vs distant description",
-    variants: afterRainVariants,
-    choices: [
-      {
-        id: "keshiki",
-        text: "景色",
-        reading: "けしき",
-        gloss: "view, scenery",
-        status: "best",
-        instinct:
-          "景色 feels close to the speaker's eyes and body. It is the view right here, being felt in the moment, so it carries warmth without sounding dramatic.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Personal", value: 5 },
-          { label: "Poetic", value: 2 },
-          { label: "Formal", value: 1 },
-        ],
-      },
-      {
-        id: "fuukei",
-        text: "風景",
-        reading: "ふうけい",
-        gloss: "landscape, scene",
-        status: "possible",
-        instinct:
-          "風景 is not wrong, but it steps back from the moment. It sounds more like a described landscape, a memory, or a framed scene in narration.",
-        weird:
-          "In casual speech here, it can feel slightly composed, as if Mina is already turning the moment into prose.",
-        tones: [
-          { label: "Natural", value: 3 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 4 },
-          { label: "Formal", value: 2 },
-        ],
-      },
-      {
-        id: "koukei",
-        text: "光景",
-        reading: "こうけい",
-        gloss: "sight, spectacle",
-        status: "awkward",
-        instinct:
-          "光景 often points to a striking sight or a scene where something is happening. It fits a dramatic moment more than a quiet city view.",
-        weird:
-          "It makes the sentence sound like Mina witnessed an event, not simply a beautiful view.",
-        tones: [
-          { label: "Natural", value: 2 },
-          { label: "Personal", value: 2 },
-          { label: "Poetic", value: 3 },
-          { label: "Formal", value: 3 },
-        ],
-      },
-      {
-        id: "keikan",
-        text: "景観",
-        reading: "けいかん",
-        gloss: "landscape appearance",
-        status: "awkward",
-        instinct:
-          "景観 belongs to public design, architecture, tourism, and city planning. It looks at scenery as an object to evaluate.",
-        weird:
-          "Here it sounds like Mina is making a planning report from the overlook.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Personal", value: 1 },
-          { label: "Poetic", value: 1 },
-          { label: "Formal", value: 5 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "train-text",
-    place: "Chuo Line, one stop before home",
-    mood: "concerned, gentle, trying not to pressure",
-    relationship: "friend texting after a hard day",
-    title: "A Message Left Open",
-    narration:
-      "Your friend saw you leave the cafe quieter than usual. A message appears while the train rocks through the dark windows.",
-    speaker: "Ren",
-    lineBefore: "今日、ちょっと元気なさそうだったけど、",
-    lineAfter: "？無理しないでね。",
-    prompt: "What sounds like a natural, caring check-in?",
-    intuition: "soft concern vs tough reassurance",
-    choices: [
-      {
-        id: "daijoubu",
-        text: "大丈夫",
-        reading: "だいじょうぶ",
-        gloss: "okay, all right",
-        status: "best",
-        instinct:
-          "大丈夫？ is the natural soft check-in. It leaves room for the other person to answer honestly and does not assume they should be fine.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Soft", value: 4 },
-          { label: "Casual", value: 4 },
-          { label: "Blunt", value: 1 },
-        ],
-      },
-      {
-        id: "heiki",
-        text: "平気",
-        reading: "へいき",
-        gloss: "fine, unaffected",
-        status: "possible",
-        instinct:
-          "平気？ can work between close friends, but it has a slightly tougher feeling, like asking whether someone can handle it.",
-        weird:
-          "Because Ren is worried, 平気？ may sound a little less tender than 大丈夫？",
-        tones: [
-          { label: "Natural", value: 3 },
-          { label: "Soft", value: 2 },
-          { label: "Casual", value: 5 },
-          { label: "Blunt", value: 3 },
-        ],
-      },
-      {
-        id: "genki",
-        text: "元気",
-        reading: "げんき",
-        gloss: "energetic, well",
-        status: "awkward",
-        instinct:
-          "元気？ asks whether someone is energetic or well in a broader sense. After saying they looked not-genki, repeating it feels a bit flat.",
-        weird:
-          "It becomes more like checking a condition than gently opening a door.",
-        tones: [
-          { label: "Natural", value: 2 },
-          { label: "Soft", value: 2 },
-          { label: "Casual", value: 4 },
-          { label: "Blunt", value: 2 },
-        ],
-      },
-      {
-        id: "mondainai",
-        text: "問題ない",
-        reading: "もんだいない",
-        gloss: "no problem",
-        status: "awkward",
-        instinct:
-          "問題ない？ sounds like confirming whether there is an issue. It is practical, not emotionally tuned.",
-        weird:
-          "In this text, it feels workplace-like and emotionally distant.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Soft", value: 1 },
-          { label: "Casual", value: 2 },
-          { label: "Blunt", value: 4 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "bookstore",
-    place: "Jimbocho secondhand bookstore",
-    mood: "slow, absorbed, privately delighted",
-    relationship: "inner narration",
-    title: "The Bookstore Window",
-    narration:
-      "You find an old poetry book near the window. Dust floats in the light, and for a while you forget the street outside.",
-    speaker: "Narration",
-    lineBefore: "窓辺の古い本を、しばらく",
-    lineAfter: "いた。",
-    prompt: "Which verb makes the action feel quietly absorbed?",
-    intuition: "functional seeing vs lingering attention",
-    choices: [
-      {
-        id: "nagameru",
-        text: "眺めて",
-        reading: "ながめて",
-        gloss: "gazing at, looking over",
-        status: "best",
-        instinct:
-          "眺める has duration and mood. The eyes rest on something, often with feeling, distance, or quiet absorption.",
-        tones: [
-          { label: "Natural", value: 5 },
-          { label: "Soft", value: 4 },
-          { label: "Poetic", value: 4 },
-          { label: "Functional", value: 1 },
-        ],
-      },
-      {
-        id: "miru",
-        text: "見て",
-        reading: "みて",
-        gloss: "looking at, seeing",
-        status: "possible",
-        instinct:
-          "見る is completely normal, but it is broad. It tells us the action, not the atmosphere.",
-        weird:
-          "Because the scene is lingering and visual, 見て feels a little plain compared with 眺めて.",
-        tones: [
-          { label: "Natural", value: 4 },
-          { label: "Soft", value: 2 },
-          { label: "Poetic", value: 1 },
-          { label: "Functional", value: 4 },
-        ],
-      },
-      {
-        id: "kansatsu",
-        text: "観察して",
-        reading: "かんさつして",
-        gloss: "observing",
-        status: "awkward",
-        instinct:
-          "観察する feels analytical. You observe a plant, a habit, a person, or a phenomenon to notice details.",
-        weird:
-          "It makes the narrator sound like they are studying the book instead of drifting into it.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Soft", value: 1 },
-          { label: "Poetic", value: 1 },
-          { label: "Functional", value: 5 },
-        ],
-      },
-      {
-        id: "haiken",
-        text: "拝見して",
-        reading: "はいけんして",
-        gloss: "humbly looking at",
-        status: "awkward",
-        instinct:
-          "拝見する is humble, polite language used toward someone else's things, work, or information.",
-        weird:
-          "In private narration it sounds stiff, as if the speaker is bowing to the book.",
-        tones: [
-          { label: "Natural", value: 1 },
-          { label: "Soft", value: 2 },
-          { label: "Poetic", value: 1 },
-          { label: "Functional", value: 3 },
-        ],
-      },
-    ],
-  },
-];
+type Scene = {
+  id: "after-rain" | "train-text" | "bookstore";
+  place: string;
+  mood: string;
+  title: string;
+  visualLabel: string;
+  variants: SceneVariant[];
+};
 
 const statusText = {
   best: "Most natural",
@@ -627,111 +47,931 @@ const statusText = {
 };
 
 const statusClass = {
-  best: "border-[#5b8d76] bg-[#eef6f1] text-[#23473b]",
-  possible: "border-[#d2a24f] bg-[#fff6e6] text-[#67440e]",
-  awkward: "border-[#c98278] bg-[#fff0ee] text-[#6c2f29]",
+  best: "border-emerald-700 bg-emerald-50 text-emerald-950",
+  possible: "border-amber-700 bg-amber-50 text-amber-950",
+  awkward: "border-rose-700 bg-rose-50 text-rose-950",
 };
+
+const scenes: Scene[] = [
+  {
+    id: "after-rain",
+    place: "Kichijoji overlook",
+    mood: "quiet after rain",
+    title: "After the Rain",
+    visualLabel: "wet city lights",
+    variants: [
+      {
+        id: "textbook",
+        label: "Textbook",
+        note: "A formal public description.",
+        narration:
+          "The same overlook appears in a guidebook-style sentence. The writer is describing a public feature, not sharing a personal feeling.",
+        speaker: "Guide text",
+        lineBefore: "この展望台からは、市街地の美しい",
+        lineAfter: "を楽しむことができます。",
+        prompt: "Which word fits this formal descriptive register?",
+        intuition: "public description vs personal reaction",
+        choices: [
+          {
+            id: "keikan",
+            text: "景観",
+            reading: "けいかん",
+            gloss: "landscape appearance",
+            status: "best",
+            instinct:
+              "景観 fits because the sentence is polished and public-facing. It treats the view as a feature of the place, which is natural in guide, tourism, and planning language.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Formal", value: 5 },
+              { label: "Personal", value: 1 },
+              { label: "Literary", value: 1 },
+            ],
+          },
+          {
+            id: "keshiki",
+            text: "景色",
+            reading: "けしき",
+            gloss: "view, scenery",
+            status: "possible",
+            instinct:
+              "景色 is understandable, but it is more everyday and personal. It would sound friendlier, like travel-blog copy rather than a formal guide.",
+            weird:
+              "It slightly softens the official tone, so the sentence loses some of its polished public-register feeling.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Formal", value: 2 },
+              { label: "Personal", value: 3 },
+              { label: "Literary", value: 1 },
+            ],
+          },
+          {
+            id: "fuukei",
+            text: "風景",
+            reading: "ふうけい",
+            gloss: "landscape, scene",
+            status: "possible",
+            instinct:
+              "風景 can work in descriptive writing, especially if the writer wants a scenic or slightly literary feeling.",
+            weird:
+              "For guidebook language, 景観 is more precise because it sounds like an official description of what visitors can view.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Formal", value: 3 },
+              { label: "Personal", value: 2 },
+              { label: "Literary", value: 3 },
+            ],
+          },
+          {
+            id: "koukei",
+            text: "光景",
+            reading: "こうけい",
+            gloss: "sight, spectacle",
+            status: "awkward",
+            instinct:
+              "光景 usually points to a specific sight or memorable scene, often with something happening.",
+            weird:
+              "A guidebook promising that visitors can enjoy a 光景 sounds oddly dramatic and less idiomatic.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Formal", value: 3 },
+              { label: "Personal", value: 2 },
+              { label: "Literary", value: 3 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "diary",
+        label: "SNS / Diary",
+        note: "A casual personal caption.",
+        narration:
+          "Later, you post one photo from the overlook. The sentence should feel light, natural, and personally felt without becoming essay-like.",
+        speaker: "Caption",
+        lineBefore: "雨上がりの",
+        lineAfter: "、めちゃくちゃきれいだった。",
+        prompt: "What sounds natural in a casual SNS or diary sentence?",
+        intuition: "shareable immediacy vs over-written caption",
+        choices: [
+          {
+            id: "keshiki",
+            text: "景色",
+            reading: "けしき",
+            gloss: "view, scenery",
+            status: "best",
+            instinct:
+              "景色 sounds like a person sharing what they saw. It is immediate, natural, and relaxed enough to sit next to めちゃくちゃきれいだった.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Casual", value: 5 },
+              { label: "Personal", value: 5 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "fuukei",
+            text: "風景",
+            reading: "ふうけい",
+            gloss: "landscape, scene",
+            status: "possible",
+            instinct:
+              "風景 can work if the caption is more aesthetic or photo-diary-like. It feels a bit more composed than everyday speech.",
+            weird:
+              "With めちゃくちゃ, 風景 is slightly more written than the rest of the sentence.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Casual", value: 3 },
+              { label: "Personal", value: 3 },
+              { label: "Formal", value: 2 },
+            ],
+          },
+          {
+            id: "koukei",
+            text: "光景",
+            reading: "こうけい",
+            gloss: "sight, spectacle",
+            status: "awkward",
+            instinct:
+              "光景 makes the caption heavier, as if the photo captured an extraordinary or dramatic sight.",
+            weird:
+              "It clashes with the casual energy of めちゃくちゃ and sounds unintentionally grand.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Casual", value: 1 },
+              { label: "Personal", value: 2 },
+              { label: "Formal", value: 3 },
+            ],
+          },
+          {
+            id: "keikan",
+            text: "景観",
+            reading: "けいかん",
+            gloss: "landscape appearance",
+            status: "awkward",
+            instinct:
+              "景観 is far too formal for a personal caption. It belongs to public scenery, cityscape preservation, and tourism language.",
+            weird:
+              "It sounds like a municipal account posted the photo, not a person sharing a pretty night.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Casual", value: 1 },
+              { label: "Personal", value: 1 },
+              { label: "Formal", value: 5 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "literature",
+        label: "Literature",
+        note: "A reflective narrated scene.",
+        narration:
+          "The same view is now written as literary narration. The sentence can tolerate more distance, imagery, and a framed sense of memory.",
+        speaker: "Narration",
+        lineBefore: "雨上がりの",
+        lineAfter: "だけが、まだ夕暮れの静けさを残していた。",
+        prompt: "Which word best carries the literary distance of this sentence?",
+        intuition: "framed scene vs immediate view",
+        choices: [
+          {
+            id: "fuukei",
+            text: "風景",
+            reading: "ふうけい",
+            gloss: "landscape, scene",
+            status: "best",
+            instinct:
+              "風景 works beautifully in narration because it frames the view as a scene. It creates a little distance, which suits memory, description, and literary atmosphere.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Literary", value: 5 },
+              { label: "Personal", value: 2 },
+              { label: "Formal", value: 2 },
+            ],
+          },
+          {
+            id: "keshiki",
+            text: "景色",
+            reading: "けしき",
+            gloss: "view, scenery",
+            status: "possible",
+            instinct:
+              "景色 still works, especially if the narration stays close to the character's eyes and feelings.",
+            weird:
+              "Compared with 風景, it feels a little more immediate and less composed.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Literary", value: 3 },
+              { label: "Personal", value: 4 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "koukei",
+            text: "光景",
+            reading: "こうけい",
+            gloss: "sight, spectacle",
+            status: "possible",
+            instinct:
+              "光景 is possible if the writer wants the image to feel striking or memorable, almost like a scene imprinted on the mind.",
+            weird:
+              "Here it can feel slightly too dramatic because the sentence is quiet rather than eventful.",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Literary", value: 4 },
+              { label: "Personal", value: 2 },
+              { label: "Formal", value: 3 },
+            ],
+          },
+          {
+            id: "keikan",
+            text: "景観",
+            reading: "けいかん",
+            gloss: "landscape appearance",
+            status: "awkward",
+            instinct:
+              "景観 breaks the literary mood because it sounds institutional and evaluative.",
+            weird:
+              "The sentence suddenly feels like a planning document rather than a quiet memory.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Literary", value: 1 },
+              { label: "Personal", value: 1 },
+              { label: "Formal", value: 5 },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "train-text",
+    place: "Chuo Line",
+    mood: "concern at night",
+    title: "A Message Left Open",
+    visualLabel: "late train window",
+    variants: [
+      {
+        id: "textbook",
+        label: "Textbook",
+        note: "A neutral explanation of condition.",
+        narration:
+          "The phrase appears in a learning example. The sentence describes whether there is a problem, so precision matters more than emotional warmth.",
+        speaker: "Example sentence",
+        lineBefore: "この程度のけがなら、",
+        lineAfter: "です。",
+        prompt: "Which expression fits a neutral statement of being okay?",
+        intuition: "objective condition vs emotional reassurance",
+        choices: [
+          {
+            id: "daijoubu",
+            text: "大丈夫",
+            reading: "だいじょうぶ",
+            gloss: "okay, all right",
+            status: "best",
+            instinct:
+              "大丈夫です fits a neutral explanation because it can describe safety, acceptability, or the absence of a serious problem.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Neutral", value: 5 },
+              { label: "Soft", value: 3 },
+              { label: "Casual", value: 1 },
+            ],
+          },
+          {
+            id: "heiki",
+            text: "平気",
+            reading: "へいき",
+            gloss: "fine, unaffected",
+            status: "possible",
+            instinct:
+              "平気です is understandable, but it focuses more on whether the person is unfazed or can endure it.",
+            weird:
+              "In a textbook-like injury example, it can sound slightly more personal or tough than the neutral 大丈夫です.",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Neutral", value: 3 },
+              { label: "Soft", value: 2 },
+              { label: "Casual", value: 3 },
+            ],
+          },
+          {
+            id: "genki",
+            text: "元気",
+            reading: "げんき",
+            gloss: "energetic, well",
+            status: "awkward",
+            instinct:
+              "元気 describes health or energy more broadly. It does not naturally evaluate whether an injury is okay.",
+            weird:
+              "It sounds like the sentence is saying the injury itself is energetic.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Neutral", value: 2 },
+              { label: "Soft", value: 2 },
+              { label: "Casual", value: 3 },
+            ],
+          },
+          {
+            id: "mondainai",
+            text: "問題ない",
+            reading: "もんだいない",
+            gloss: "no problem",
+            status: "possible",
+            instinct:
+              "問題ないです can work when judging whether something is a problem. It sounds more technical and less reassuring.",
+            weird:
+              "It fits a report better than a human explanation to someone worried.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Neutral", value: 5 },
+              { label: "Soft", value: 1 },
+              { label: "Casual", value: 1 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "diary",
+        label: "SNS / Diary",
+        note: "A friend checks in gently.",
+        narration:
+          "You are writing a short message after noticing your friend seemed quiet. The goal is concern without pressure.",
+        speaker: "Message",
+        lineBefore: "今日ちょっと元気なさそうだったけど、",
+        lineAfter: "？無理しないでね。",
+        prompt: "Which expression feels most caring and natural in a message?",
+        intuition: "soft check-in vs tough reassurance",
+        choices: [
+          {
+            id: "daijoubu",
+            text: "大丈夫",
+            reading: "だいじょうぶ",
+            gloss: "okay, all right",
+            status: "best",
+            instinct:
+              "大丈夫？ is the natural soft check-in. It leaves room for the other person to answer honestly and does not imply they should be fine.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Soft", value: 5 },
+              { label: "Casual", value: 4 },
+              { label: "Blunt", value: 1 },
+            ],
+          },
+          {
+            id: "heiki",
+            text: "平気",
+            reading: "へいき",
+            gloss: "fine, unaffected",
+            status: "possible",
+            instinct:
+              "平気？ can work between close friends, but it has a tougher feeling, like asking whether someone can handle it.",
+            weird:
+              "Because this message is worried and gentle, 平気？ may sound a little less tender than 大丈夫？",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Soft", value: 2 },
+              { label: "Casual", value: 5 },
+              { label: "Blunt", value: 3 },
+            ],
+          },
+          {
+            id: "genki",
+            text: "元気",
+            reading: "げんき",
+            gloss: "energetic, well",
+            status: "awkward",
+            instinct:
+              "元気？ asks whether someone is energetic or well in a broad sense. After saying they looked not-genki, repeating it feels flat.",
+            weird:
+              "It becomes more like checking a condition than gently opening a door.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Soft", value: 2 },
+              { label: "Casual", value: 4 },
+              { label: "Blunt", value: 2 },
+            ],
+          },
+          {
+            id: "mondainai",
+            text: "問題ない",
+            reading: "もんだいない",
+            gloss: "no problem",
+            status: "awkward",
+            instinct:
+              "問題ない？ sounds like confirming whether there is an issue. It is practical, not emotionally tuned.",
+            weird:
+              "In this text, it feels workplace-like and emotionally distant.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Soft", value: 1 },
+              { label: "Casual", value: 2 },
+              { label: "Blunt", value: 4 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "literature",
+        label: "Literature",
+        note: "A character hides how they feel.",
+        narration:
+          "In fiction, the phrase can carry the gap between what a character says and what they actually feel.",
+        speaker: "Narration",
+        lineBefore: "「",
+        lineAfter: "」と彼女は笑った。けれど、その声は少し震えていた。",
+        prompt: "Which expression carries the fragile reassurance in this line?",
+        intuition: "spoken reassurance vs emotional leakage",
+        choices: [
+          {
+            id: "daijoubu",
+            text: "大丈夫",
+            reading: "だいじょうぶ",
+            gloss: "okay, all right",
+            status: "best",
+            instinct:
+              "大丈夫 works because it can be sincere, polite, or quietly false. In narration, that ambiguity lets the reader feel the character trying to reassure someone.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Soft", value: 4 },
+              { label: "Literary", value: 4 },
+              { label: "Blunt", value: 1 },
+            ],
+          },
+          {
+            id: "heiki",
+            text: "平気",
+            reading: "へいき",
+            gloss: "fine, unaffected",
+            status: "possible",
+            instinct:
+              "平気 can work if the character is trying to sound tough or casual. It has more resistance in it.",
+            weird:
+              "For a trembling voice, 平気 feels more like bravado than gentle reassurance.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Soft", value: 2 },
+              { label: "Literary", value: 3 },
+              { label: "Blunt", value: 3 },
+            ],
+          },
+          {
+            id: "genki",
+            text: "元気",
+            reading: "げんき",
+            gloss: "energetic, well",
+            status: "awkward",
+            instinct:
+              "元気 sounds like a state of health or cheerfulness, not the kind of reassurance someone gives while hiding hurt.",
+            weird:
+              "It makes the line sound oddly cheerful and reduces the emotional tension.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Soft", value: 2 },
+              { label: "Literary", value: 1 },
+              { label: "Blunt", value: 1 },
+            ],
+          },
+          {
+            id: "mondainai",
+            text: "問題ない",
+            reading: "もんだいない",
+            gloss: "no problem",
+            status: "awkward",
+            instinct:
+              "問題ない is controlled and practical. It can be characterful, but not tender by default.",
+            weird:
+              "Unless the character is intentionally cold or formal, it flattens the vulnerable mood.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Soft", value: 1 },
+              { label: "Literary", value: 2 },
+              { label: "Blunt", value: 4 },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "bookstore",
+    place: "Jimbocho bookstore",
+    mood: "quiet concentration",
+    title: "The Bookstore Window",
+    visualLabel: "bookstore afternoon",
+    variants: [
+      {
+        id: "textbook",
+        label: "Textbook",
+        note: "A neutral explanation of action.",
+        narration:
+          "The sentence appears in a language textbook. The goal is to describe the basic action clearly, not create atmosphere.",
+        speaker: "Example sentence",
+        lineBefore: "学生たちは展示されている本を",
+        lineAfter: "いました。",
+        prompt: "Which verb fits a neutral textbook description?",
+        intuition: "clear action vs atmospheric gaze",
+        choices: [
+          {
+            id: "miru",
+            text: "見て",
+            reading: "みて",
+            gloss: "looking at, seeing",
+            status: "best",
+            instinct:
+              "見る is broad and neutral, which is exactly why it fits a textbook sentence. It teaches the action without adding mood.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Neutral", value: 5 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "nagameru",
+            text: "眺めて",
+            reading: "ながめて",
+            gloss: "gazing at, looking over",
+            status: "possible",
+            instinct:
+              "眺める is natural, but it adds duration and mood. It sounds more like the students are lingering over the books.",
+            weird:
+              "For a basic example sentence, it may teach extra nuance the sentence does not need.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Neutral", value: 2 },
+              { label: "Atmospheric", value: 5 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "kansatsu",
+            text: "観察して",
+            reading: "かんさつして",
+            gloss: "observing",
+            status: "possible",
+            instinct:
+              "観察する works if the students are studying details carefully, but it changes the scene into analysis.",
+            weird:
+              "Without that study context, it sounds too scientific for simply looking at books.",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Neutral", value: 4 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 4 },
+            ],
+          },
+          {
+            id: "haiken",
+            text: "拝見して",
+            reading: "はいけんして",
+            gloss: "humbly looking at",
+            status: "awkward",
+            instinct:
+              "拝見する is humble language. It does not fit a neutral third-person textbook sentence about students.",
+            weird:
+              "The students suddenly sound like they are politely humbling themselves to the books.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Neutral", value: 1 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 5 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "diary",
+        label: "SNS / Diary",
+        note: "A casual personal memory.",
+        narration:
+          "You write a small diary note after finding an old poetry book near the window. The sentence should feel personal and unforced.",
+        speaker: "Diary",
+        lineBefore: "窓辺の古い本を、しばらく",
+        lineAfter: "いた。",
+        prompt: "Which verb makes the diary feel quietly absorbed?",
+        intuition: "lingering attention vs plain action",
+        choices: [
+          {
+            id: "nagameru",
+            text: "眺めて",
+            reading: "ながめて",
+            gloss: "gazing at, looking over",
+            status: "best",
+            instinct:
+              "眺める has duration and mood. The eyes rest on something, often with feeling, distance, or quiet absorption.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Casual", value: 3 },
+              { label: "Atmospheric", value: 5 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "miru",
+            text: "見て",
+            reading: "みて",
+            gloss: "looking at, seeing",
+            status: "possible",
+            instinct:
+              "見る is completely normal, but it is broad. It tells us the action, not the atmosphere.",
+            weird:
+              "Because the diary is lingering and visual, 見て feels a little plain compared with 眺めて.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Casual", value: 4 },
+              { label: "Atmospheric", value: 2 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "kansatsu",
+            text: "観察して",
+            reading: "かんさつして",
+            gloss: "observing",
+            status: "awkward",
+            instinct:
+              "観察する feels analytical. You observe a plant, a habit, a person, or a phenomenon to notice details.",
+            weird:
+              "It makes the writer sound like they are studying the book instead of drifting into it.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Casual", value: 1 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 4 },
+            ],
+          },
+          {
+            id: "haiken",
+            text: "拝見して",
+            reading: "はいけんして",
+            gloss: "humbly looking at",
+            status: "awkward",
+            instinct:
+              "拝見する is humble, polite language used toward someone else's things, work, or information.",
+            weird:
+              "In private diary narration it sounds stiff, as if the writer is bowing to the book.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Casual", value: 1 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 5 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "literature",
+        label: "Literature",
+        note: "A sentence with stillness.",
+        narration:
+          "In a literary passage, the act of looking can carry time, attention, and silence. The word should let the scene breathe.",
+        speaker: "Narration",
+        lineBefore: "彼は古い詩集の背表紙を、午後の光の中で",
+        lineAfter: "いた。",
+        prompt: "Which verb gives the scene stillness and duration?",
+        intuition: "poetic gaze vs mechanical seeing",
+        choices: [
+          {
+            id: "nagameru",
+            text: "眺めて",
+            reading: "ながめて",
+            gloss: "gazing at, looking over",
+            status: "best",
+            instinct:
+              "眺める is natural in literature because it lets looking become time. It suggests a gaze that lingers rather than a quick act of seeing.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Literary", value: 5 },
+              { label: "Atmospheric", value: 5 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "miru",
+            text: "見て",
+            reading: "みて",
+            gloss: "looking at, seeing",
+            status: "possible",
+            instinct:
+              "見る is possible, but it makes the sentence more functional. The scene loses some quiet duration.",
+            weird:
+              "It is not wrong; it is simply less textured than 眺めて.",
+            tones: [
+              { label: "Natural", value: 4 },
+              { label: "Literary", value: 2 },
+              { label: "Atmospheric", value: 2 },
+              { label: "Formal", value: 1 },
+            ],
+          },
+          {
+            id: "kansatsu",
+            text: "観察して",
+            reading: "かんさつして",
+            gloss: "observing",
+            status: "awkward",
+            instinct:
+              "観察する would make the character sound analytical, as if collecting details for a study.",
+            weird:
+              "It breaks the stillness and replaces mood with examination.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Literary", value: 1 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 4 },
+            ],
+          },
+          {
+            id: "haiken",
+            text: "拝見して",
+            reading: "はいけんして",
+            gloss: "humbly looking at",
+            status: "awkward",
+            instinct:
+              "拝見する could be used in dialogue with politeness, but here it interrupts the narrator's quiet distance.",
+            weird:
+              "The humility sounds socially marked in a sentence that wants visual stillness.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Literary", value: 1 },
+              { label: "Atmospheric", value: 1 },
+              { label: "Formal", value: 5 },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+function answerKey(sceneId: Scene["id"], variantId: SceneVariant["id"]) {
+  return `${sceneId}:${variantId}`;
+}
+
+function SceneImage({
+  scene,
+  variant,
+}: {
+  scene: Scene["id"];
+  variant: SceneVariant["id"];
+}) {
+  const isTextbook = variant === "textbook";
+  const isDiary = variant === "diary";
+
+  return (
+    <div className="relative min-h-[250px] overflow-hidden bg-slate-100">
+      {scene === "after-rain" ? (
+        <>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,#dbeafe_0%,#e0f2fe_48%,#94a3b8_49%,#475569_100%)]" />
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-slate-800" />
+          {[12, 31, 54, 76].map((left, index) => (
+            <div
+              className="absolute bottom-12 w-16 rounded-t-sm bg-slate-700"
+              key={left}
+              style={{ height: `${80 + index * 18}px`, left: `${left}%` }}
+            >
+              <div className="grid grid-cols-2 gap-2 p-3">
+                {Array.from({ length: 8 }).map((_, light) => (
+                  <span
+                    className={`h-2 rounded-sm ${isTextbook ? "bg-slate-400" : "bg-amber-200"}`}
+                    key={light}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      ) : null}
+
+      {scene === "train-text" ? (
+        <>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,#e5e7eb_0%,#cbd5e1_48%,#334155_49%,#0f172a_100%)]" />
+          <div className="absolute left-[8%] top-[18%] h-32 w-[84%] rounded-md border-4 border-slate-700 bg-slate-900">
+            <div className="absolute inset-3 rounded-sm bg-[linear-gradient(120deg,#1e293b,#475569)]" />
+            <div className="absolute left-10 top-10 h-3 w-32 rounded-full bg-sky-200/70" />
+            <div className="absolute right-12 top-16 h-2 w-20 rounded-full bg-amber-200/80" />
+          </div>
+          <div className="absolute bottom-8 left-[20%] h-20 w-[60%] rounded-md bg-white shadow-lg">
+            <div className="m-4 h-3 w-3/4 rounded bg-slate-300" />
+            <div className="mx-4 h-3 w-1/2 rounded bg-slate-200" />
+          </div>
+        </>
+      ) : null}
+
+      {scene === "bookstore" ? (
+        <>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#e2e8f0_48%,#cbd5e1_100%)]" />
+          <div className="absolute bottom-0 left-[8%] h-44 w-[84%] rounded-t-md bg-slate-800" />
+          {Array.from({ length: 18 }).map((_, index) => (
+            <span
+              className={`absolute bottom-8 h-28 w-3 rounded-sm ${index % 3 === 0 ? "bg-sky-200" : index % 3 === 1 ? "bg-emerald-200" : "bg-slate-300"}`}
+              key={index}
+              style={{ left: `${15 + index * 4}%`, height: `${70 + (index % 5) * 10}px` }}
+            />
+          ))}
+          <div className="absolute right-[18%] top-10 h-28 w-20 rounded-sm bg-white/70 shadow" />
+        </>
+      ) : null}
+
+      <div className="absolute inset-0 bg-white/10" />
+      <div className="absolute left-5 top-5 rounded-md border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+        <p className="text-sm font-semibold text-slate-950">
+          {isTextbook ? "Reference view" : isDiary ? "Personal view" : "Literary view"}
+        </p>
+        <p className="text-xs text-slate-700">
+          {variant === "literature" ? "framed and reflective" : variant === "diary" ? "close and immediate" : "clean and descriptive"}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function ScenePrototype() {
   const [sceneIndex, setSceneIndex] = useState(0);
-  const [variantId, setVariantId] = useState(afterRainVariants[0].id);
+  const [variantId, setVariantId] = useState<SceneVariant["id"]>("textbook");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answered, setAnswered] = useState<Record<string, string>>({});
 
   const scene = scenes[sceneIndex];
-  const activeVariant = scene.variants?.find((variant) => variant.id === variantId);
-  const currentUnit = activeVariant ?? scene;
-  const answerKey = activeVariant ? `${scene.id}:${activeVariant.id}` : scene.id;
-  const selected = currentUnit.choices.find((choice) => choice.id === selectedId);
-  const lessonUnits = scenes.reduce((total, item) => total + (item.variants?.length ?? 1), 0);
+  const activeVariant = scene.variants.find((variant) => variant.id === variantId) ?? scene.variants[0];
+  const currentAnswerKey = answerKey(scene.id, activeVariant.id);
+  const selected = activeVariant.choices.find((choice) => choice.id === selectedId);
+  const bestChoice = activeVariant.choices.find((choice) => choice.status === "best");
+  const lessonUnits = scenes.length * 3;
   const completedCount = Object.keys(answered).length;
-  const bestChoice = currentUnit.choices.find((choice) => choice.status === "best");
 
   const instinctProfile = useMemo(() => {
-    const selectedChoices = scenes.flatMap((item) => {
-      if (item.variants) {
-        return item.variants
-          .map((variant) =>
-            variant.choices.find((choice) => choice.id === answered[`${item.id}:${variant.id}`]),
-          )
-          .filter(Boolean) as Choice[];
-      }
-
-      const choice = item.choices.find((option) => option.id === answered[item.id]);
-
-      return choice ? [choice] : [];
-    });
+    const selectedChoices = scenes.flatMap((item) =>
+      item.variants
+        .map((variant) =>
+          variant.choices.find((choice) => choice.id === answered[answerKey(item.id, variant.id)]),
+        )
+        .filter(Boolean),
+    ) as Choice[];
 
     const tooFormal = selectedChoices.filter((choice) =>
       choice.tones.some((tone) => tone.label === "Formal" && tone.value >= 4),
     ).length;
     const tooFunctional = selectedChoices.filter((choice) =>
-      choice.tones.some((tone) => tone.label === "Functional" && tone.value >= 4),
+      choice.tones.some((tone) => ["Neutral", "Formal"].includes(tone.label) && tone.value >= 5),
     ).length;
     const best = selectedChoices.filter((choice) => choice.status === "best").length;
 
     if (!selectedChoices.length) {
-      return "Your intuition profile will appear as you move through scenes.";
+      return "Your intuition profile will appear as you compare registers.";
     }
 
     if (best === selectedChoices.length) {
-      return "You are choosing words that fit the emotional temperature of the scene.";
+      return "You are tracking how register changes the natural choice.";
     }
 
     if (tooFormal > 0) {
-      return "You may be reaching for precise words that sound a little formal in intimate moments.";
+      return "You may be reaching for precise words that sound too formal in personal writing.";
     }
 
     if (tooFunctional > 0) {
-      return "You may be choosing words that describe the action but miss the atmosphere.";
+      return "You may be choosing words that explain the action clearly but miss the emotional register.";
     }
 
-    return "You are noticing meaning, and the next step is tuning social distance and softness.";
+    return "You are noticing meaning; the next step is tuning distance, softness, and genre.";
   }, [answered]);
 
   function choose(choice: Choice) {
     setSelectedId(choice.id);
-    setAnswered((current) => ({ ...current, [answerKey]: choice.id }));
+    setAnswered((current) => ({ ...current, [currentAnswerKey]: choice.id }));
   }
 
   function goToScene(nextIndex: number) {
     const nextScene = scenes[nextIndex];
-    const nextVariantId = nextScene.variants?.[0].id ?? "";
-    const nextAnswerKey = nextScene.variants
-      ? `${nextScene.id}:${nextVariantId}`
-      : nextScene.id;
+    const nextVariantId = nextScene.variants[0].id;
 
     setSceneIndex(nextIndex);
     setVariantId(nextVariantId);
-    setSelectedId(answered[nextAnswerKey] ?? null);
+    setSelectedId(answered[answerKey(nextScene.id, nextVariantId)] ?? null);
   }
 
-  function switchVariant(nextVariantId: string) {
-    const nextAnswerKey = `${scene.id}:${nextVariantId}`;
-
+  function switchVariant(nextVariantId: SceneVariant["id"]) {
     setVariantId(nextVariantId);
-    setSelectedId(answered[nextAnswerKey] ?? null);
+    setSelectedId(answered[answerKey(scene.id, nextVariantId)] ?? null);
   }
 
   function reset() {
     setAnswered({});
     setSelectedId(null);
     setSceneIndex(0);
-    setVariantId(afterRainVariants[0].id);
+    setVariantId("textbook");
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f1e8] text-[#27221d]">
+    <main className="min-h-screen bg-slate-50 text-slate-950">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ded2c0] pb-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
           <div>
-            <p className="text-sm font-medium text-[#8f5d3f]">言葉の温度</p>
-            <h1 className="text-2xl font-semibold sm:text-3xl">Kotoba no Ondo</h1>
+            <p className="text-sm font-medium text-slate-700">言葉の温度</p>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Kotoba no Ondo</h1>
           </div>
-          <div className="flex items-center gap-3 text-sm text-[#665c50]">
+          <div className="flex items-center gap-3 text-sm text-slate-700">
             <span>{completedCount} / {lessonUnits} moments</span>
             <button
-              className="h-10 rounded-md border border-[#c9b9a2] px-4 font-medium transition hover:bg-[#efe4d4]"
+              className="h-10 rounded-md border border-slate-300 bg-white px-4 font-medium text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950"
               onClick={reset}
               type="button"
             >
@@ -741,103 +981,73 @@ export default function ScenePrototype() {
         </header>
 
         <section className="grid flex-1 gap-5 py-5 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="flex min-h-[640px] flex-col overflow-hidden rounded-lg border border-[#d8c9b5] bg-[#fffaf2] shadow-[0_22px_70px_rgba(85,62,38,0.13)]">
-            <div className="relative min-h-[260px] overflow-hidden bg-[#d8d8ca]">
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,#d7e3df_0%,#f1d7bd_56%,#8e7966_57%,#594b43_100%)]" />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-[linear-gradient(90deg,#3f544d,#6d675a,#4f453f)] opacity-80" />
-              <div className="absolute bottom-12 left-[10%] h-32 w-24 rounded-t-md bg-[#55483f] shadow-2xl">
-                <div className="grid grid-cols-3 gap-2 p-3">
-                  {Array.from({ length: 9 }).map((_, index) => (
-                    <span key={index} className="h-3 rounded-sm bg-[#f6d58d]" />
-                  ))}
-                </div>
-              </div>
-              <div className="absolute bottom-10 left-[36%] h-44 w-32 rounded-t-md bg-[#6a5a4f] shadow-2xl">
-                <div className="grid grid-cols-4 gap-2 p-3">
-                  {Array.from({ length: 16 }).map((_, index) => (
-                    <span key={index} className="h-3 rounded-sm bg-[#f3c982]" />
-                  ))}
-                </div>
-              </div>
-              <div className="absolute bottom-8 right-[12%] h-36 w-28 rounded-t-md bg-[#4d5d5c] shadow-2xl">
-                <div className="grid grid-cols-3 gap-2 p-3">
-                  {Array.from({ length: 12 }).map((_, index) => (
-                    <span key={index} className="h-3 rounded-sm bg-[#f1dba7]" />
-                  ))}
-                </div>
-              </div>
-              <div className="absolute left-6 top-6 rounded-md bg-[#fffaf2]/82 px-4 py-3 backdrop-blur">
-                <p className="text-sm font-semibold text-[#3f5148]">{scene.place}</p>
-                <p className="text-xs text-[#665c50]">{scene.mood}</p>
-              </div>
-            </div>
+          <div className="flex min-h-[640px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <SceneImage scene={scene.id} variant={activeVariant.id} />
 
             <div className="flex flex-1 flex-col gap-5 p-5 sm:p-7">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm text-[#8f5d3f]">{scene.relationship}</p>
-                  <h2 className="mt-1 text-3xl font-semibold">{scene.title}</h2>
+                  <p className="text-sm text-slate-700">{scene.place} · {scene.mood}</p>
+                  <h2 className="mt-1 text-3xl font-semibold tracking-tight">{scene.title}</h2>
                 </div>
-                <span className="rounded-md border border-[#d8c9b5] px-3 py-2 text-sm text-[#665c50]">
-                  Theme: {currentUnit.intuition}
+                <span className="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800">
+                  Theme: {activeVariant.intuition}
                 </span>
               </div>
 
-              <p className="max-w-3xl text-base leading-7 text-[#554d44]">{currentUnit.narration}</p>
+              <p className="max-w-3xl text-base leading-7 text-slate-700">{activeVariant.narration}</p>
 
-              {scene.variants ? (
-                <div className="grid gap-2 rounded-lg border border-[#d8c9b5] bg-[#fbf3e8] p-2 sm:grid-cols-4">
-                  {scene.variants.map((variant) => {
-                    const isActive = variant.id === activeVariant?.id;
+              <div className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 sm:grid-cols-3">
+                {scene.variants.map((variant) => {
+                  const isActive = variant.id === activeVariant.id;
 
-                    return (
-                      <button
-                        className={`min-h-20 rounded-md border p-3 text-left transition ${
-                          isActive
-                            ? "border-[#8f5d3f] bg-[#fffaf2] shadow-[0_8px_18px_rgba(85,62,38,0.1)]"
-                            : "border-transparent hover:bg-[#fffaf2]"
-                        }`}
-                        key={variant.id}
-                        onClick={() => switchVariant(variant.id)}
-                        type="button"
-                      >
-                        <span className="block text-sm font-semibold text-[#27221d]">{variant.label}</span>
-                        <span className="mt-1 block text-xs leading-5 text-[#665c50]">{variant.note}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
+                  return (
+                    <button
+                      className={`min-h-20 rounded-md border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
+                        isActive
+                          ? "border-slate-950 bg-white shadow-sm"
+                          : "border-transparent text-slate-700 hover:bg-white"
+                      }`}
+                      key={variant.id}
+                      onClick={() => switchVariant(variant.id)}
+                      type="button"
+                    >
+                      <span className="block text-sm font-semibold text-slate-950">{variant.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-700">{variant.note}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-              <div className="rounded-lg border border-[#d8c9b5] bg-[#f8efe2] p-5">
-                <p className="mb-3 text-sm font-semibold text-[#8f5d3f]">{currentUnit.speaker}</p>
-                <p className="text-2xl leading-10 text-[#27221d]">
-                  {currentUnit.lineBefore}
-                  <span className="mx-2 inline-flex min-h-11 min-w-28 items-center justify-center rounded-md border border-dashed border-[#a98968] bg-[#fffaf2] px-4 text-xl text-[#8f5d3f]">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+                <p className="mb-3 text-sm font-semibold text-slate-700">{activeVariant.speaker}</p>
+                <p className="text-2xl leading-10 text-slate-950">
+                  {activeVariant.lineBefore}
+                  <span className="mx-2 inline-flex min-h-11 min-w-28 items-center justify-center rounded-md border border-dashed border-slate-500 bg-white px-4 text-xl text-slate-950">
                     {selected?.text ?? "_____"}
                   </span>
-                  {currentUnit.lineAfter}
+                  {activeVariant.lineAfter}
                 </p>
               </div>
 
               <div>
-                <p className="mb-3 text-sm font-semibold text-[#554d44]">{currentUnit.prompt}</p>
+                <p className="mb-3 text-sm font-semibold text-slate-800">{activeVariant.prompt}</p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {currentUnit.choices.map((choice) => {
+                  {activeVariant.choices.map((choice) => {
                     const isSelected = selectedId === choice.id;
                     return (
                       <button
-                        className={`min-h-24 rounded-lg border p-4 text-left transition ${
+                        className={`min-h-24 rounded-lg border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
                           isSelected
-                            ? "border-[#8f5d3f] bg-[#f1dfcc] shadow-[0_10px_24px_rgba(85,62,38,0.14)]"
-                            : "border-[#d8c9b5] bg-[#fffaf2] hover:border-[#a98968] hover:bg-[#fbf1e5]"
+                            ? "border-slate-950 bg-slate-100 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-500 hover:bg-slate-50"
                         }`}
                         key={choice.id}
                         onClick={() => choose(choice)}
                         type="button"
                       >
-                        <span className="block text-2xl font-semibold">{choice.text}</span>
-                        <span className="mt-1 block text-sm text-[#665c50]">
+                        <span className="block text-2xl font-semibold text-slate-950">{choice.text}</span>
+                        <span className="mt-1 block text-sm text-slate-700">
                           {choice.reading} · {choice.gloss}
                         </span>
                       </button>
@@ -849,25 +1059,25 @@ export default function ScenePrototype() {
           </div>
 
           <aside className="flex flex-col gap-5">
-            <div className="rounded-lg border border-[#d8c9b5] bg-[#fffaf2] p-5 shadow-[0_18px_55px_rgba(85,62,38,0.1)]">
-              <p className="text-sm font-semibold text-[#8f5d3f]">Nuance reveal</p>
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-sm font-semibold text-slate-700">Nuance reveal</p>
               {selected ? (
                 <div className="mt-4">
                   <span className={`inline-flex rounded-md border px-3 py-2 text-sm font-semibold ${statusClass[selected.status]}`}>
                     {statusText[selected.status]}
                   </span>
-                  <h3 className="mt-4 text-2xl font-semibold">{selected.text}</h3>
-                  <p className="mt-3 leading-7 text-[#554d44]">{selected.instinct}</p>
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-950">{selected.text}</h3>
+                  <p className="mt-3 leading-7 text-slate-700">{selected.instinct}</p>
                   {selected.weird ? (
-                    <div className="mt-4 border-l-4 border-[#c98278] bg-[#fff0ee] p-4">
-                      <p className="text-sm font-semibold text-[#6c2f29]">Why this sounds weird</p>
-                      <p className="mt-2 leading-6 text-[#6c2f29]">{selected.weird}</p>
+                    <div className="mt-4 border-l-4 border-rose-700 bg-rose-50 p-4">
+                      <p className="text-sm font-semibold text-rose-950">Why this sounds weird</p>
+                      <p className="mt-2 leading-6 text-rose-950">{selected.weird}</p>
                     </div>
                   ) : (
-                    <div className="mt-4 border-l-4 border-[#5b8d76] bg-[#eef6f1] p-4">
-                      <p className="text-sm font-semibold text-[#23473b]">Native speaker instinct</p>
-                      <p className="mt-2 leading-6 text-[#23473b]">
-                        This choice matches the relationship, emotional softness, and point of view in the scene.
+                    <div className="mt-4 border-l-4 border-emerald-700 bg-emerald-50 p-4">
+                      <p className="text-sm font-semibold text-emerald-950">Native speaker instinct</p>
+                      <p className="mt-2 leading-6 text-emerald-950">
+                        This choice matches the genre, emotional distance, and natural point of view in this version.
                       </p>
                     </div>
                   )}
@@ -875,13 +1085,13 @@ export default function ScenePrototype() {
                   <div className="mt-5 space-y-3">
                     {selected.tones.map((tone) => (
                       <div key={tone.label}>
-                        <div className="mb-1 flex justify-between text-sm text-[#665c50]">
+                        <div className="mb-1 flex justify-between text-sm text-slate-700">
                           <span>{tone.label}</span>
                           <span>{tone.value}/5</span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-[#eadfcc]">
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
                           <div
-                            className="h-full rounded-full bg-[#8f5d3f]"
+                            className="h-full rounded-full bg-slate-950"
                             style={{ width: `${tone.value * 20}%` }}
                           />
                         </div>
@@ -890,46 +1100,37 @@ export default function ScenePrototype() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-8 min-h-80 rounded-lg border border-dashed border-[#d8c9b5] bg-[#fbf3e8] p-6 text-[#665c50]">
-                  Choose the word that feels most natural. The explanation will focus on tone, emotional posture, and what would sound instinctive to a native speaker.
+                <div className="mt-8 min-h-80 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-700">
+                  Choose the word that feels most natural. The explanation will focus on register, genre, emotional posture, and native speaker instinct.
                 </div>
               )}
             </div>
 
-            <div className="rounded-lg border border-[#d8c9b5] bg-[#fffaf2] p-5">
-              <p className="text-sm font-semibold text-[#8f5d3f]">Intuition profile</p>
-              <p className="mt-3 leading-7 text-[#554d44]">{instinctProfile}</p>
+            <div className="rounded-lg border border-slate-200 bg-white p-5">
+              <p className="text-sm font-semibold text-slate-700">Intuition profile</p>
+              <p className="mt-3 leading-7 text-slate-700">{instinctProfile}</p>
             </div>
 
-            <div className="rounded-lg border border-[#d8c9b5] bg-[#fffaf2] p-5">
-              <p className="text-sm font-semibold text-[#8f5d3f]">Episode path</p>
+            <div className="rounded-lg border border-slate-200 bg-white p-5">
+              <p className="text-sm font-semibold text-slate-700">Episode path</p>
               <div className="mt-4 grid gap-2">
                 {scenes.map((item, index) => {
-                  const answeredVariants = item.variants
-                    ? item.variants.filter((variant) => answered[`${item.id}:${variant.id}`]).length
-                    : 0;
-                  const answerId = answered[item.id];
-                  const answer = item.choices.find((choice) => choice.id === answerId);
-                  const statusLine = item.variants
-                    ? `${answeredVariants} / ${item.variants.length} context lenses`
-                    : answer
-                      ? `${statusText[answer.status]}: ${answer.text}`
-                      : "Not answered yet";
+                  const answeredVariants = item.variants.filter((variant) => answered[answerKey(item.id, variant.id)]).length;
 
                   return (
                     <button
-                      className={`rounded-md border p-3 text-left transition ${
+                      className={`rounded-md border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
                         index === sceneIndex
-                          ? "border-[#8f5d3f] bg-[#f1dfcc]"
-                          : "border-[#d8c9b5] hover:bg-[#fbf1e5]"
+                          ? "border-slate-950 bg-slate-100"
+                          : "border-slate-200 hover:bg-slate-50"
                       }`}
                       key={item.id}
                       onClick={() => goToScene(index)}
                       type="button"
                     >
-                      <span className="block font-semibold">{item.title}</span>
-                      <span className="mt-1 block text-sm text-[#665c50]">
-                        {statusLine}
+                      <span className="block font-semibold text-slate-950">{item.title}</span>
+                      <span className="mt-1 block text-sm text-slate-700">
+                        {answeredVariants} / {item.variants.length} register lenses
                       </span>
                     </button>
                   );
@@ -939,7 +1140,7 @@ export default function ScenePrototype() {
 
             <div className="flex gap-3">
               <button
-                className="h-12 flex-1 rounded-md border border-[#c9b9a2] font-semibold transition hover:bg-[#efe4d4]"
+                className="h-12 flex-1 rounded-md border border-slate-300 bg-white font-semibold text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950 disabled:bg-slate-100 disabled:text-slate-500"
                 disabled={sceneIndex === 0}
                 onClick={() => goToScene(Math.max(0, sceneIndex - 1))}
                 type="button"
@@ -947,7 +1148,7 @@ export default function ScenePrototype() {
                 Previous
               </button>
               <button
-                className="h-12 flex-1 rounded-md bg-[#3f5148] font-semibold text-[#fffaf2] transition hover:bg-[#314139] disabled:bg-[#b8aa98]"
+                className="h-12 flex-1 rounded-md bg-slate-950 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-600"
                 disabled={!selected || sceneIndex === scenes.length - 1}
                 onClick={() => goToScene(Math.min(scenes.length - 1, sceneIndex + 1))}
                 type="button"
@@ -957,8 +1158,8 @@ export default function ScenePrototype() {
             </div>
 
             {selected && bestChoice && selected.status !== "best" ? (
-              <p className="rounded-lg border border-[#d8c9b5] bg-[#fbf3e8] p-4 text-sm leading-6 text-[#665c50]">
-                Most natural here: <span className="font-semibold text-[#27221d]">{bestChoice.text}</span>. Try comparing how the sentence feels when the speaker is closer, softer, or more detached.
+              <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+                Most natural here: <span className="font-semibold text-slate-950">{bestChoice.text}</span>. Compare how the same idea changes between textbook, SNS/diary, and literature.
               </p>
             ) : null}
           </aside>
