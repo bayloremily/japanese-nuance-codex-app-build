@@ -1292,6 +1292,7 @@ function SceneImage({
 }
 
 export default function ScenePrototype() {
+  const [view, setView] = useState<"library" | "practice">("library");
   const [setIndex, setSetIndex] = useState(0);
   const [sceneIndex, setSceneIndex] = useState(0);
   const [variantId, setVariantId] = useState<SceneVariant["id"]>("textbook");
@@ -1373,6 +1374,7 @@ export default function ScenePrototype() {
     setSceneIndex(0);
     setVariantId(nextVariantId);
     setSelectedId(answered[answerKey(nextSet.id, nextScene.id, nextVariantId)] ?? null);
+    setView("practice");
   }
 
   function reset() {
@@ -1386,9 +1388,23 @@ export default function ScenePrototype() {
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-5 sm:px-8 lg:px-10">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-medium text-slate-700">言葉の温度</p>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Kotoba no Ondo</h1>
+          <div className="flex items-center gap-3">
+            <button
+              aria-label="Open word library"
+              className="flex h-11 w-11 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950"
+              onClick={() => setView("library")}
+              type="button"
+            >
+              <span className="space-y-1.5" aria-hidden="true">
+                <span className="block h-0.5 w-5 bg-slate-950" />
+                <span className="block h-0.5 w-5 bg-slate-950" />
+                <span className="block h-0.5 w-5 bg-slate-950" />
+              </span>
+            </button>
+            <div>
+              <p className="text-sm font-medium text-slate-700">言葉の温度</p>
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Kotoba no Ondo</h1>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-700">
             <span>{completedCount} / {lessonUnits} 問</span>
@@ -1414,38 +1430,62 @@ export default function ScenePrototype() {
           </div>
         </header>
 
+        {view === "library" ? (
+          <section className="flex-1 py-8">
+            <div className="mb-6 max-w-3xl">
+              <p className="text-sm font-semibold text-slate-700">ライブラリ</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                練習する言葉を選ぶ
+              </h2>
+              <p className="mt-3 leading-7 text-slate-700">
+                Choose a nuance set to practice. As this grows, this page can become the main searchable library for word families, registers, levels, and saved confusion patterns.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {wordSets.map((set, index) => {
+                const setTotal = set.scenes.length * 3;
+                const setCompleted = Object.keys(answered).filter((key) => key.startsWith(`${set.id}:`)).length;
+                const levels = Array.from(
+                  new Set(set.scenes.flatMap((item) => item.variants.map((variant) => variant.level))),
+                );
+
+                return (
+                  <button
+                    className={`min-h-56 rounded-lg border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-950 ${
+                      index === setIndex ? "border-slate-950" : "border-slate-200"
+                    }`}
+                    key={set.id}
+                    onClick={() => switchWordSet(index)}
+                    type="button"
+                  >
+                    <span className="text-sm font-semibold text-slate-700">言葉セット</span>
+                    <span className="mt-3 block text-2xl font-semibold text-slate-950">{set.label}</span>
+                    <span className="mt-2 block leading-6 text-slate-700">{set.subtitle}</span>
+                    <span className="mt-5 flex flex-wrap gap-2">
+                      {levels.map((level) => (
+                        <span className="rounded-md border border-slate-300 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-800" key={level}>
+                          {level}
+                        </span>
+                      ))}
+                    </span>
+                    <span className="mt-5 block text-sm text-slate-700">
+                      {setCompleted} / {setTotal} 問
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : (
         <section className="grid flex-1 gap-5 py-5 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="flex min-h-[640px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <SceneImage scene={scene.id} variant={activeVariant.id} />
 
             <div className="flex flex-1 flex-col gap-5 p-5 sm:p-7">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
-                <p className="px-2 pb-2 text-sm font-semibold text-slate-700">言葉セット</p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {wordSets.map((set, index) => {
-                    const isActive = index === setIndex;
-
-                    return (
-                      <button
-                        className={`rounded-md border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
-                          isActive
-                            ? "border-slate-950 bg-white shadow-sm"
-                            : "border-transparent bg-slate-50 hover:bg-white"
-                        }`}
-                        key={set.id}
-                        onClick={() => switchWordSet(index)}
-                        type="button"
-                      >
-                        <span className="block font-semibold text-slate-950">{set.label}</span>
-                        <span className="mt-1 block text-sm text-slate-700">{set.subtitle}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
+                  <p className="mb-2 text-sm font-semibold text-slate-700">{activeSet.label}</p>
                   <p className="text-sm text-slate-700">{scene.place} · {scene.mood}</p>
                   <h2 className="mt-1 text-3xl font-semibold tracking-tight">{scene.title}</h2>
                 </div>
@@ -1619,6 +1659,7 @@ export default function ScenePrototype() {
             ) : null}
           </aside>
         </section>
+        )}
       </div>
     </main>
   );
