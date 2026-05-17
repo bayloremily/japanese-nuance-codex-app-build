@@ -34,12 +34,19 @@ type SceneVariant = {
 };
 
 type Scene = {
-  id: "after-rain" | "train-text" | "bookstore";
+  id: string;
   place: string;
   mood: string;
   title: string;
   visualLabel: string;
   variants: SceneVariant[];
+};
+
+type WordSet = {
+  id: string;
+  label: string;
+  subtitle: string;
+  scenes: Scene[];
 };
 
 const statusText = {
@@ -54,7 +61,7 @@ const statusClass = {
   awkward: "border-rose-700 bg-rose-50 text-rose-950",
 };
 
-const scenes: Scene[] = [
+const sceneryScenes: Scene[] = [
   {
     id: "after-rain",
     place: "Kichijoji overlook",
@@ -813,8 +820,278 @@ const scenes: Scene[] = [
   },
 ];
 
-function answerKey(sceneId: Scene["id"], variantId: SceneVariant["id"]) {
-  return `${sceneId}:${variantId}`;
+const worldScenes: Scene[] = [
+  {
+    id: "world-stage",
+    place: "words for the world",
+    mood: "scale, society, ambition",
+    title: "世界 and 天下",
+    visualLabel: "wide horizon",
+    variants: [
+      {
+        id: "textbook",
+        label: "教科書",
+        note: "A neutral factual sentence.",
+        level: "N4",
+        narration:
+          "The sentence appears in an explanatory passage. The writer is speaking neutrally about the world as a whole.",
+        speaker: "Example sentence",
+        lineBefore: "インターネットによって、",
+        lineAfter: "中の人々とつながることができる。",
+        prompt: "Which word naturally means the world as a broad global space?",
+        intuition: "global scope vs historical rule",
+        choices: [
+          {
+            id: "sekai",
+            text: "世界",
+            reading: "せかい",
+            gloss: "world",
+            status: "best",
+            instinct:
+              "世界 is the ordinary, neutral word for the world. It naturally covers countries, people, society, culture, and a broad global space.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Neutral", value: 5 },
+              { label: "Modern", value: 4 },
+              { label: "Literary", value: 1 },
+            ],
+          },
+          {
+            id: "tenka",
+            text: "天下",
+            reading: "てんか",
+            gloss: "the realm, all under heaven",
+            status: "awkward",
+            instinct:
+              "天下 is not the normal modern word for the connected world. It carries older, grander ideas of rule, power, or the realm under heaven.",
+            weird:
+              "In a neutral technology sentence, 天下 sounds historical or theatrical, as if the internet is unifying a kingdom.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Neutral", value: 1 },
+              { label: "Modern", value: 1 },
+              { label: "Literary", value: 4 },
+            ],
+          },
+          {
+            id: "chikyuu",
+            text: "地球",
+            reading: "ちきゅう",
+            gloss: "Earth, the planet",
+            status: "possible",
+            instinct:
+              "地球 focuses on the physical planet. It can work when the sentence is about the Earth itself, the environment, or geography.",
+            weird:
+              "Here the sentence is about people and society, so 世界 feels more human and natural.",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Neutral", value: 5 },
+              { label: "Modern", value: 4 },
+              { label: "Literary", value: 1 },
+            ],
+          },
+          {
+            id: "seken",
+            text: "世間",
+            reading: "せけん",
+            gloss: "society, people around one",
+            status: "awkward",
+            instinct:
+              "世間 means society or the people around you, often with a sense of public opinion.",
+            weird:
+              "世間中の人々 sounds like everyone in society gossiping, not people around the world.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Neutral", value: 2 },
+              { label: "Modern", value: 3 },
+              { label: "Literary", value: 1 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "diary",
+        label: "SNS・日記",
+        note: "A personal feeling of expansion.",
+        level: "N3",
+        narration:
+          "You write about meeting people who changed how you see things. The word should feel personal, but still natural.",
+        speaker: "Diary",
+        lineBefore: "あの人たちに会ってから、自分の",
+        lineAfter: "が少し広がった気がする。",
+        prompt: "Which word naturally describes someone's personal sense of the world?",
+        intuition: "inner world vs public society",
+        choices: [
+          {
+            id: "sekai",
+            text: "世界",
+            reading: "せかい",
+            gloss: "world",
+            status: "best",
+            instinct:
+              "自分の世界 is a natural expression for someone's inner range of experience, perspective, interests, or imagination.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Personal", value: 5 },
+              { label: "Modern", value: 4 },
+              { label: "Grand", value: 2 },
+            ],
+          },
+          {
+            id: "seken",
+            text: "世間",
+            reading: "せけん",
+            gloss: "society, public",
+            status: "possible",
+            instinct:
+              "世間 can refer to society or the outside world, but 自分の世間 is less natural than 自分の世界.",
+            weird:
+              "It sounds more like your social surroundings or public awareness expanded, not your personal inner world.",
+            tones: [
+              { label: "Natural", value: 3 },
+              { label: "Personal", value: 2 },
+              { label: "Modern", value: 3 },
+              { label: "Grand", value: 1 },
+            ],
+          },
+          {
+            id: "tenka",
+            text: "天下",
+            reading: "てんか",
+            gloss: "the realm, dominance",
+            status: "awkward",
+            instinct:
+              "天下 carries scale, power, and old-fashioned grandeur. It is not used for a personal range of feeling or experience.",
+            weird:
+              "自分の天下が広がった sounds like your territory or dominance expanded.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Personal", value: 1 },
+              { label: "Modern", value: 1 },
+              { label: "Grand", value: 5 },
+            ],
+          },
+          {
+            id: "chikyuu",
+            text: "地球",
+            reading: "ちきゅう",
+            gloss: "Earth, the planet",
+            status: "awkward",
+            instinct:
+              "地球 is the physical planet, so it does not fit an inner personal feeling.",
+            weird:
+              "It sounds as if your private planet got bigger.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Personal", value: 1 },
+              { label: "Modern", value: 4 },
+              { label: "Grand", value: 2 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "literature",
+        label: "文学",
+        note: "A historical, dramatic register.",
+        level: "N1",
+        narration:
+          "The passage sounds like historical fiction or a grand narration of ambition. This is where older scale and power matter.",
+        speaker: "Narration",
+        lineBefore: "若き武将は、いつか",
+        lineAfter: "を取ると心に誓った。",
+        prompt: "Which word carries the historical idea of taking power over the realm?",
+        intuition: "ordinary world vs realm under rule",
+        choices: [
+          {
+            id: "tenka",
+            text: "天下",
+            reading: "てんか",
+            gloss: "the realm, all under heaven",
+            status: "best",
+            instinct:
+              "天下 is the natural choice here because 天下を取る is an established expression meaning to take power over the realm or become supreme.",
+            tones: [
+              { label: "Natural", value: 5 },
+              { label: "Historical", value: 5 },
+              { label: "Grand", value: 5 },
+              { label: "Modern", value: 1 },
+            ],
+          },
+          {
+            id: "sekai",
+            text: "世界",
+            reading: "せかい",
+            gloss: "world",
+            status: "awkward",
+            instinct:
+              "世界 is the ordinary word for the world, but 世界を取る is not the idiomatic historical expression.",
+            weird:
+              "It sounds like physically taking the world, or like an awkward translation of world domination.",
+            tones: [
+              { label: "Natural", value: 2 },
+              { label: "Historical", value: 1 },
+              { label: "Grand", value: 3 },
+              { label: "Modern", value: 4 },
+            ],
+          },
+          {
+            id: "seken",
+            text: "世間",
+            reading: "せけん",
+            gloss: "society, public",
+            status: "awkward",
+            instinct:
+              "世間 is society or public opinion. It does not carry the idea of conquering or ruling a realm.",
+            weird:
+              "世間を取る sounds like taking public opinion in a strange, unidiomatic way.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Historical", value: 1 },
+              { label: "Grand", value: 1 },
+              { label: "Modern", value: 2 },
+            ],
+          },
+          {
+            id: "chikyuu",
+            text: "地球",
+            reading: "ちきゅう",
+            gloss: "Earth, the planet",
+            status: "awkward",
+            instinct:
+              "地球 is the planet as a physical object. It belongs to geography, science, or environmental contexts.",
+            weird:
+              "地球を取る sounds like science fiction, not historical ambition.",
+            tones: [
+              { label: "Natural", value: 1 },
+              { label: "Historical", value: 1 },
+              { label: "Grand", value: 3 },
+              { label: "Modern", value: 4 },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+const wordSets: WordSet[] = [
+  {
+    id: "scenery",
+    label: "景色・風景・光景・景観",
+    subtitle: "views, scenes, and visual distance",
+    scenes: sceneryScenes,
+  },
+  {
+    id: "world",
+    label: "世界・天下",
+    subtitle: "world, society, realm, and power",
+    scenes: worldScenes,
+  },
+];
+
+function answerKey(setId: string, sceneId: Scene["id"], variantId: SceneVariant["id"]) {
+  return `${setId}:${sceneId}:${variantId}`;
 }
 
 const furiganaEntries = [
@@ -825,6 +1102,17 @@ const furiganaEntries = [
   ["景色", "けしき"],
   ["風景", "ふうけい"],
   ["光景", "こうけい"],
+  ["世界", "せかい"],
+  ["天下", "てんか"],
+  ["世間", "せけん"],
+  ["地球", "ちきゅう"],
+  ["人々", "ひとびと"],
+  ["自分", "じぶん"],
+  ["若き", "わかき"],
+  ["武将", "ぶしょう"],
+  ["取る", "とる"],
+  ["心", "こころ"],
+  ["誓った", "ちかった"],
   ["程度", "ていど"],
   ["今日", "きょう"],
   ["元気", "げんき"],
@@ -977,6 +1265,19 @@ function SceneImage({
         </>
       ) : null}
 
+      {scene === "world-stage" ? (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,#e0f2fe_0%,#f8fafc_36%,#cbd5e1_74%)]" />
+          <div className="absolute bottom-0 left-0 right-0 h-28 bg-slate-800" />
+          <div className="absolute left-1/2 top-12 h-28 w-28 -translate-x-1/2 rounded-full border-4 border-slate-700 bg-sky-100" />
+          <div className="absolute left-[18%] bottom-14 h-16 w-32 rounded-t-full bg-slate-700" />
+          <div className="absolute right-[18%] bottom-14 h-16 w-32 rounded-t-full bg-slate-700" />
+          {variant === "literature" ? (
+            <div className="absolute bottom-24 left-1/2 h-24 w-16 -translate-x-1/2 rounded-t-lg bg-slate-950 shadow-lg" />
+          ) : null}
+        </>
+      ) : null}
+
       <div className="absolute inset-0 bg-white/10" />
       <div className="absolute left-5 top-5 rounded-md border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
         <p className="text-sm font-semibold text-slate-950">
@@ -991,25 +1292,28 @@ function SceneImage({
 }
 
 export default function ScenePrototype() {
+  const [setIndex, setSetIndex] = useState(0);
   const [sceneIndex, setSceneIndex] = useState(0);
   const [variantId, setVariantId] = useState<SceneVariant["id"]>("textbook");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answered, setAnswered] = useState<Record<string, string>>({});
   const [showFurigana, setShowFurigana] = useState(false);
 
+  const activeSet = wordSets[setIndex];
+  const scenes = activeSet.scenes;
   const scene = scenes[sceneIndex];
   const activeVariant = scene.variants.find((variant) => variant.id === variantId) ?? scene.variants[0];
-  const currentAnswerKey = answerKey(scene.id, activeVariant.id);
+  const currentAnswerKey = answerKey(activeSet.id, scene.id, activeVariant.id);
   const selected = activeVariant.choices.find((choice) => choice.id === selectedId);
   const bestChoice = activeVariant.choices.find((choice) => choice.status === "best");
   const lessonUnits = scenes.length * 3;
-  const completedCount = Object.keys(answered).length;
+  const completedCount = Object.keys(answered).filter((key) => key.startsWith(`${activeSet.id}:`)).length;
 
   const instinctProfile = useMemo(() => {
     const selectedChoices = scenes.flatMap((item) =>
       item.variants
         .map((variant) =>
-          variant.choices.find((choice) => choice.id === answered[answerKey(item.id, variant.id)]),
+          variant.choices.find((choice) => choice.id === answered[answerKey(activeSet.id, item.id, variant.id)]),
         )
         .filter(Boolean),
     ) as Choice[];
@@ -1039,7 +1343,7 @@ export default function ScenePrototype() {
     }
 
     return "You are noticing meaning; the next step is tuning distance, softness, and genre.";
-  }, [answered]);
+  }, [activeSet.id, answered, scenes]);
 
   function choose(choice: Choice) {
     setSelectedId(choice.id);
@@ -1052,12 +1356,23 @@ export default function ScenePrototype() {
 
     setSceneIndex(nextIndex);
     setVariantId(nextVariantId);
-    setSelectedId(answered[answerKey(nextScene.id, nextVariantId)] ?? null);
+    setSelectedId(answered[answerKey(activeSet.id, nextScene.id, nextVariantId)] ?? null);
   }
 
   function switchVariant(nextVariantId: SceneVariant["id"]) {
     setVariantId(nextVariantId);
-    setSelectedId(answered[answerKey(scene.id, nextVariantId)] ?? null);
+    setSelectedId(answered[answerKey(activeSet.id, scene.id, nextVariantId)] ?? null);
+  }
+
+  function switchWordSet(nextSetIndex: number) {
+    const nextSet = wordSets[nextSetIndex];
+    const nextScene = nextSet.scenes[0];
+    const nextVariantId = nextScene.variants[0].id;
+
+    setSetIndex(nextSetIndex);
+    setSceneIndex(0);
+    setVariantId(nextVariantId);
+    setSelectedId(answered[answerKey(nextSet.id, nextScene.id, nextVariantId)] ?? null);
   }
 
   function reset() {
@@ -1104,6 +1419,31 @@ export default function ScenePrototype() {
             <SceneImage scene={scene.id} variant={activeVariant.id} />
 
             <div className="flex flex-1 flex-col gap-5 p-5 sm:p-7">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                <p className="px-2 pb-2 text-sm font-semibold text-slate-700">言葉セット</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {wordSets.map((set, index) => {
+                    const isActive = index === setIndex;
+
+                    return (
+                      <button
+                        className={`rounded-md border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
+                          isActive
+                            ? "border-slate-950 bg-white shadow-sm"
+                            : "border-transparent bg-slate-50 hover:bg-white"
+                        }`}
+                        key={set.id}
+                        onClick={() => switchWordSet(index)}
+                        type="button"
+                      >
+                        <span className="block font-semibold text-slate-950">{set.label}</span>
+                        <span className="mt-1 block text-sm text-slate-700">{set.subtitle}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-sm text-slate-700">{scene.place} · {scene.mood}</p>
@@ -1230,7 +1570,7 @@ export default function ScenePrototype() {
               <p className="text-sm font-semibold text-slate-700">シーン</p>
               <div className="mt-4 grid gap-2">
                 {scenes.map((item, index) => {
-                  const answeredVariants = item.variants.filter((variant) => answered[answerKey(item.id, variant.id)]).length;
+                  const answeredVariants = item.variants.filter((variant) => answered[answerKey(activeSet.id, item.id, variant.id)]).length;
 
                   return (
                     <button
