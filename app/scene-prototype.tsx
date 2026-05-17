@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 type Tone = {
   label: string;
@@ -22,6 +23,7 @@ type SceneVariant = {
   id: "textbook" | "diary" | "literature";
   label: string;
   note: string;
+  level: "N4" | "N3" | "N2" | "N1";
   narration: string;
   speaker: string;
   lineBefore: string;
@@ -41,9 +43,9 @@ type Scene = {
 };
 
 const statusText = {
-  best: "Most natural",
-  possible: "Possible, but shifted",
-  awkward: "Grammatically possible, emotionally off",
+  best: "自然",
+  possible: "使えるがニュアンスが変わる",
+  awkward: "文法的でも不自然",
 };
 
 const statusClass = {
@@ -62,8 +64,9 @@ const scenes: Scene[] = [
     variants: [
       {
         id: "textbook",
-        label: "Textbook",
+        label: "教科書",
         note: "A formal public description.",
+        level: "N3",
         narration:
           "The same overlook appears in a guidebook-style sentence. The writer is describing a public feature, not sharing a personal feeling.",
         speaker: "Guide text",
@@ -142,8 +145,9 @@ const scenes: Scene[] = [
       },
       {
         id: "diary",
-        label: "SNS / Diary",
+        label: "SNS・日記",
         note: "A casual personal caption.",
+        level: "N4",
         narration:
           "Later, you post one photo from the overlook. The sentence should feel light, natural, and personally felt without becoming essay-like.",
         speaker: "Caption",
@@ -222,8 +226,9 @@ const scenes: Scene[] = [
       },
       {
         id: "literature",
-        label: "Literature",
+        label: "文学",
         note: "A reflective narrated scene.",
+        level: "N2",
         narration:
           "The same view is now written as literary narration. The sentence can tolerate more distance, imagery, and a framed sense of memory.",
         speaker: "Narration",
@@ -311,8 +316,9 @@ const scenes: Scene[] = [
     variants: [
       {
         id: "textbook",
-        label: "Textbook",
+        label: "教科書",
         note: "A neutral explanation of condition.",
+        level: "N4",
         narration:
           "The phrase appears in a learning example. The sentence describes whether there is a problem, so precision matters more than emotional warmth.",
         speaker: "Example sentence",
@@ -391,8 +397,9 @@ const scenes: Scene[] = [
       },
       {
         id: "diary",
-        label: "SNS / Diary",
+        label: "SNS・日記",
         note: "A friend checks in gently.",
+        level: "N4",
         narration:
           "You are writing a short message after noticing your friend seemed quiet. The goal is concern without pressure.",
         speaker: "Message",
@@ -471,8 +478,9 @@ const scenes: Scene[] = [
       },
       {
         id: "literature",
-        label: "Literature",
+        label: "文学",
         note: "A character hides how they feel.",
+        level: "N2",
         narration:
           "In fiction, the phrase can carry the gap between what a character says and what they actually feel.",
         speaker: "Narration",
@@ -560,8 +568,9 @@ const scenes: Scene[] = [
     variants: [
       {
         id: "textbook",
-        label: "Textbook",
+        label: "教科書",
         note: "A neutral explanation of action.",
+        level: "N4",
         narration:
           "The sentence appears in a language textbook. The goal is to describe the basic action clearly, not create atmosphere.",
         speaker: "Example sentence",
@@ -640,8 +649,9 @@ const scenes: Scene[] = [
       },
       {
         id: "diary",
-        label: "SNS / Diary",
+        label: "SNS・日記",
         note: "A casual personal memory.",
+        level: "N3",
         narration:
           "You write a small diary note after finding an old poetry book near the window. The sentence should feel personal and unforced.",
         speaker: "Diary",
@@ -720,8 +730,9 @@ const scenes: Scene[] = [
       },
       {
         id: "literature",
-        label: "Literature",
+        label: "文学",
         note: "A sentence with stillness.",
+        level: "N1",
         narration:
           "In a literary passage, the act of looking can carry time, attention, and silence. The word should let the scene breathe.",
         speaker: "Narration",
@@ -804,6 +815,101 @@ const scenes: Scene[] = [
 
 function answerKey(sceneId: Scene["id"], variantId: SceneVariant["id"]) {
   return `${sceneId}:${variantId}`;
+}
+
+const furiganaEntries = [
+  ["雨上がり", "あめあがり"],
+  ["展望台", "てんぼうだい"],
+  ["市街地", "しがいち"],
+  ["景観", "けいかん"],
+  ["景色", "けしき"],
+  ["風景", "ふうけい"],
+  ["光景", "こうけい"],
+  ["程度", "ていど"],
+  ["今日", "きょう"],
+  ["元気", "げんき"],
+  ["大丈夫", "だいじょうぶ"],
+  ["平気", "へいき"],
+  ["問題", "もんだい"],
+  ["彼女", "かのじょ"],
+  ["笑った", "わらった"],
+  ["震えて", "ふるえて"],
+  ["学生", "がくせい"],
+  ["展示", "てんじ"],
+  ["窓辺", "まどべ"],
+  ["古い", "ふるい"],
+  ["眺めて", "ながめて"],
+  ["見て", "みて"],
+  ["観察", "かんさつ"],
+  ["拝見", "はいけん"],
+  ["彼", "かれ"],
+  ["詩集", "ししゅう"],
+  ["背表紙", "せびょうし"],
+  ["午後", "ごご"],
+  ["光", "ひかり"],
+  ["夕暮れ", "ゆうぐれ"],
+  ["静けさ", "しずけさ"],
+] as const;
+
+function withFurigana(text: string, showFurigana: boolean): ReactNode[] {
+  if (!showFurigana) {
+    return [text];
+  }
+
+  const entries = [...furiganaEntries].sort((a, b) => b[0].length - a[0].length);
+  const nodes: ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length) {
+    const match = entries.find(([word]) => remaining.startsWith(word));
+
+    if (match) {
+      nodes.push(
+        <ruby key={key}>
+          {match[0]}
+          <rt>{match[1]}</rt>
+        </ruby>,
+      );
+      remaining = remaining.slice(match[0].length);
+    } else {
+      nodes.push(remaining[0]);
+      remaining = remaining.slice(1);
+    }
+
+    key += 1;
+  }
+
+  return nodes;
+}
+
+function ToneGauge({ tone }: { tone: Tone }) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-4 text-sm text-slate-700">
+        <span>{tone.label}</span>
+        <span className="sr-only">{tone.value} out of 5</span>
+      </div>
+      <div className="relative h-3 rounded-full bg-slate-200">
+        <div
+          className="absolute left-0 top-0 h-3 rounded-full bg-slate-950"
+          style={{ width: `${tone.value * 20}%` }}
+        />
+        <div
+          className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-slate-950 bg-white shadow-sm"
+          style={{ left: `${tone.value * 20}%` }}
+        />
+      </div>
+      <div className="mt-2 grid grid-cols-5 gap-1" aria-hidden="true">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <span
+            className={`h-1 rounded-full ${index < tone.value ? "bg-slate-950" : "bg-slate-200"}`}
+            key={index}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function SceneImage({
@@ -889,6 +995,7 @@ export default function ScenePrototype() {
   const [variantId, setVariantId] = useState<SceneVariant["id"]>("textbook");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answered, setAnswered] = useState<Record<string, string>>({});
+  const [showFurigana, setShowFurigana] = useState(false);
 
   const scene = scenes[sceneIndex];
   const activeVariant = scene.variants.find((variant) => variant.id === variantId) ?? scene.variants[0];
@@ -968,14 +1075,26 @@ export default function ScenePrototype() {
             <p className="text-sm font-medium text-slate-700">言葉の温度</p>
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Kotoba no Ondo</h1>
           </div>
-          <div className="flex items-center gap-3 text-sm text-slate-700">
-            <span>{completedCount} / {lessonUnits} moments</span>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-700">
+            <span>{completedCount} / {lessonUnits} 問</span>
+            <button
+              aria-pressed={showFurigana}
+              className={`h-10 rounded-md border px-4 font-medium transition focus:outline-none focus:ring-2 focus:ring-slate-950 ${
+                showFurigana
+                  ? "border-slate-950 bg-slate-950 text-white"
+                  : "border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+              }`}
+              onClick={() => setShowFurigana((current) => !current)}
+              type="button"
+            >
+              ふりがな
+            </button>
             <button
               className="h-10 rounded-md border border-slate-300 bg-white px-4 font-medium text-slate-950 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950"
               onClick={reset}
               type="button"
             >
-              Reset
+              リセット
             </button>
           </div>
         </header>
@@ -990,8 +1109,8 @@ export default function ScenePrototype() {
                   <p className="text-sm text-slate-700">{scene.place} · {scene.mood}</p>
                   <h2 className="mt-1 text-3xl font-semibold tracking-tight">{scene.title}</h2>
                 </div>
-                <span className="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800">
-                  Theme: {activeVariant.intuition}
+                <span className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-950">
+                  {activeVariant.level}
                 </span>
               </div>
 
@@ -1012,7 +1131,10 @@ export default function ScenePrototype() {
                       onClick={() => switchVariant(variant.id)}
                       type="button"
                     >
-                      <span className="block text-sm font-semibold text-slate-950">{variant.label}</span>
+                      <span className="flex items-center justify-between gap-2 text-sm font-semibold text-slate-950">
+                        <span>{variant.label}</span>
+                        <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">{variant.level}</span>
+                      </span>
                       <span className="mt-1 block text-xs leading-5 text-slate-700">{variant.note}</span>
                     </button>
                   );
@@ -1022,11 +1144,11 @@ export default function ScenePrototype() {
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
                 <p className="mb-3 text-sm font-semibold text-slate-700">{activeVariant.speaker}</p>
                 <p className="text-2xl leading-10 text-slate-950">
-                  {activeVariant.lineBefore}
+                  {withFurigana(activeVariant.lineBefore, showFurigana)}
                   <span className="mx-2 inline-flex min-h-11 min-w-28 items-center justify-center rounded-md border border-dashed border-slate-500 bg-white px-4 text-xl text-slate-950">
-                    {selected?.text ?? "_____"}
+                    {selected ? withFurigana(selected.text, showFurigana) : "_____"}
                   </span>
-                  {activeVariant.lineAfter}
+                  {withFurigana(activeVariant.lineAfter, showFurigana)}
                 </p>
               </div>
 
@@ -1046,9 +1168,11 @@ export default function ScenePrototype() {
                         onClick={() => choose(choice)}
                         type="button"
                       >
-                        <span className="block text-2xl font-semibold text-slate-950">{choice.text}</span>
+                        <span className="block text-2xl font-semibold text-slate-950">
+                          {withFurigana(choice.text, showFurigana)}
+                        </span>
                         <span className="mt-1 block text-sm text-slate-700">
-                          {choice.reading} · {choice.gloss}
+                          {showFurigana ? choice.gloss : `${choice.reading} · ${choice.gloss}`}
                         </span>
                       </button>
                     );
@@ -1060,13 +1184,15 @@ export default function ScenePrototype() {
 
           <aside className="flex flex-col gap-5">
             <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-slate-700">Nuance reveal</p>
+              <p className="text-sm font-semibold text-slate-700">解説</p>
               {selected ? (
                 <div className="mt-4">
                   <span className={`inline-flex rounded-md border px-3 py-2 text-sm font-semibold ${statusClass[selected.status]}`}>
                     {statusText[selected.status]}
                   </span>
-                  <h3 className="mt-4 text-2xl font-semibold text-slate-950">{selected.text}</h3>
+                  <h3 className="mt-4 text-2xl font-semibold text-slate-950">
+                    {withFurigana(selected.text, showFurigana)}
+                  </h3>
                   <p className="mt-3 leading-7 text-slate-700">{selected.instinct}</p>
                   {selected.weird ? (
                     <div className="mt-4 border-l-4 border-rose-700 bg-rose-50 p-4">
@@ -1082,37 +1208,26 @@ export default function ScenePrototype() {
                     </div>
                   )}
 
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-5 space-y-5">
                     {selected.tones.map((tone) => (
-                      <div key={tone.label}>
-                        <div className="mb-1 flex justify-between text-sm text-slate-700">
-                          <span>{tone.label}</span>
-                          <span>{tone.value}/5</span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                          <div
-                            className="h-full rounded-full bg-slate-950"
-                            style={{ width: `${tone.value * 20}%` }}
-                          />
-                        </div>
-                      </div>
+                      <ToneGauge key={tone.label} tone={tone} />
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="mt-8 min-h-80 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-700">
-                  Choose the word that feels most natural. The explanation will focus on register, genre, emotional posture, and native speaker instinct.
+                  いちばん自然に聞こえる表現を選んでください。Explanations will focus on register, genre, emotional posture, and native speaker instinct.
                 </div>
               )}
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <p className="text-sm font-semibold text-slate-700">Intuition profile</p>
+              <p className="text-sm font-semibold text-slate-700">直感プロフィール</p>
               <p className="mt-3 leading-7 text-slate-700">{instinctProfile}</p>
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <p className="text-sm font-semibold text-slate-700">Episode path</p>
+              <p className="text-sm font-semibold text-slate-700">シーン</p>
               <div className="mt-4 grid gap-2">
                 {scenes.map((item, index) => {
                   const answeredVariants = item.variants.filter((variant) => answered[answerKey(item.id, variant.id)]).length;
@@ -1145,15 +1260,15 @@ export default function ScenePrototype() {
                 onClick={() => goToScene(Math.max(0, sceneIndex - 1))}
                 type="button"
               >
-                Previous
+                前へ
               </button>
               <button
-                className="h-12 flex-1 rounded-md bg-slate-950 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-600"
-                disabled={!selected || sceneIndex === scenes.length - 1}
+                className="h-12 flex-1 rounded-md bg-slate-950 font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-600"
+                disabled={sceneIndex === scenes.length - 1}
                 onClick={() => goToScene(Math.min(scenes.length - 1, sceneIndex + 1))}
                 type="button"
               >
-                Next scene
+                次のシーン
               </button>
             </div>
 

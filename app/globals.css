@@ -25,3 +25,14 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
+
+ruby {
+  ruby-position: over;
+}
+
+rt {
+  color: #475569;
+  font-size: 0.56em;
+  font-weight: 500;
+  line-height: 1;
+}
